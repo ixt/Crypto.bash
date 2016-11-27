@@ -72,7 +72,7 @@ gen_key(){
     # them into the correct variables
     WHO=$1
     echo "Generating $WHO's keys"
-    local key=$(./crypto.bash gen | grep -o .)
+    local key=$(./crypto.bash -g | grep -o .)
     echo $key | sed -e "s/ //g"
     local e
     local d
@@ -107,7 +107,7 @@ do_encrypt(){
     TARGET=$5
     # Get Plain Text
     PLAIN=$(whiptail --inputbox "Hi $NAME, what would you like to send to $TARGET?" 20 70 1 --title "Send a message" 3>&1 1>&2 2>&3)
-    CYPHER=$(./crypto.bash e $KEY "$PLAIN")
+    CYPHER=$(./crypto.bash -e $KEY "$PLAIN")
     # Some Pointery stuff
     i=\$"$2"
     _i=`eval "expr \"$i\" "`
@@ -125,7 +125,7 @@ do_decrypt(){
         whiptail "Nothing in Bob's Inbox" 20 20 1
         return
     fi
-    PLAIN=$(./crypto.bash d $KEY "$_i")
+    PLAIN=$(./crypto.bash -d $KEY "$_i")
     eval "$3=\"$PLAIN\""
 }
 

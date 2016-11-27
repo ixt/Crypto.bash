@@ -76,8 +76,8 @@ make_message(){
     local SIGNKEY=$(echo $5 | sed -e "s/d/e/")
     PLAIN=$(echo -e "$TARGET, \"$NAME\", $REQUEST")
     echo "Encrypting: \"$PLAIN\" with $1 signed $SIGNKEY"
-    CYPHER=$(./crypto.bash e $KEY "$PLAIN")
-    SIG=$(./crypto.bash e $SIGNKEY "$PLAIN")
+    CYPHER=$(./crypto.bash -e $KEY "$PLAIN")
+    SIG=$(./crypto.bash -e $SIGNKEY "$PLAIN")
     MESSAGE=$(echo "$CYPHER sig $SIG")
     echo "Cypher text: $MESSAGE"
 }
@@ -88,7 +88,7 @@ do_decrypt(){
     INPUT=$2
     CYPHER_MSG=$(echo $INPUT | sed -e "s/sig.*//g")
     echo "CYPHER MSG: $CYPHER_MSG"
-    CLE_MESSAGE=$(./crypto.bash d $PRIKEY "$CYPHER_MSG")
+    CLE_MESSAGE=$(./crypto.bash -d $PRIKEY "$CYPHER_MSG")
     echo "Decrypted Message: $CLE_MESSAGE"
     MESSAGE="$CLE_MESSAGE"
 }
@@ -104,13 +104,13 @@ do_server_check_sig(){
     CYPHER_MSG=$(echo $MESSAGE | sed -e "s/sig.*//g")
     echo "CYPHER MSG: $CYPHER_MSG"
 
-    CLE_MESSAGE=$(./crypto.bash d $SERVER_PRIKEY "$CYPHER_MSG")
+    CLE_MESSAGE=$(./crypto.bash -d $SERVER_PRIKEY "$CYPHER_MSG")
     echo "Decrypted Message: $CLE_MESSAGE"
 
     SIGNER=$(echo "$CLE_MESSAGE" | cut -d"," -f 2 | sed -e "s/\"//g")
     get_key $SIGNER
     UNSIGNKEY=$(echo $SERVER_ENCKEY | sed -e "s/e/d/g")
-    SIG_MESSAGE=$(./crypto.bash d $UNSIGNKEY "$CYPHER_SIG")
+    SIG_MESSAGE=$(./crypto.bash -d $UNSIGNKEY "$CYPHER_SIG")
 
     echo "Signed Output: $SIG_MESSAGE"
     if [[ "$SIG_MESSAGE" == "$CLE_MESSAGE" ]]; then
@@ -143,11 +143,11 @@ do_check_sig(){
     CYPHER_MSG=$(echo $INPUT | sed -e "s/sig.*//g")
     echo "CYPHER MSG: $CYPHER_MSG"
 
-    CLE_MESSAGE=$(./crypto.bash d $PRIKEY "$CYPHER_MSG")
+    CLE_MESSAGE=$(./crypto.bash -d $PRIKEY "$CYPHER_MSG")
     echo "Decrypted Message: $CLE_MESSAGE"
 
     UNSIGNKEY=$(echo $CHECKKEY | sed -e "s/e/d/g")
-    SIG_MESSAGE=$(./crypto.bash d $UNSIGNKEY "$CYPHER_SIG")
+    SIG_MESSAGE=$(./crypto.bash -d $UNSIGNKEY "$CYPHER_SIG")
 
     echo "Signed Output: $SIG_MESSAGE"
     if [[ "$SIG_MESSAGE" == "$CLE_MESSAGE" ]]; then
